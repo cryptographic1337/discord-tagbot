@@ -99,7 +99,7 @@ exports.list = function (msg) {
 			message += "\n";
 
 			keywords.forEach((result, index) => {
-				message += `${index + 1}.) ${result}\n`;
+				message += `${index + 1}.) \`${result}\`\n`;
 			})
 		} else {
 			message += "you are not subscribed to any keywords.";
@@ -127,7 +127,6 @@ exports.handleMessage = function (msg, pingChannel) {
 		if (err) return handle_error(err, msg);
 
 		keywords.forEach(keyword => {
-			console.log(keyword.keyword);
 			for (let i = 0; i < titles.length; i++) {
 				if (titles[i].includes(keyword.keyword?.toLowerCase()))
 					notify_users(keyword.keyword, keyword.users)
@@ -137,14 +136,13 @@ exports.handleMessage = function (msg, pingChannel) {
 
 	function notify_users(keyword, users) {
 		let message = "";
-		users.forEach(user => {
-			message += '<@' + user + '>\n';
-		})
-
-		message += "\n";
 		message += `Keyword \`${keyword}\` has been found. Use the link below to jump to the message.\n`;
 		message += "\n";
 		message += msg.url;
+		message += "\n";
+		users.forEach(user => {
+			message += '<@' + user + '>\n';
+		})
 
 		pingChannel.send(message);
 	}

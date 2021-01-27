@@ -47,11 +47,19 @@ exports.removeKeyword = function (author, keyword, callback) {
 		if (err) return callback(err);
 		if (!keyword.users.includes(author)) return callback("ERR_USER_NOT_SUBSCRIBED");
 
-		Keyword.findOneAndUpdate({id: keyword.id}, {$pull: {users: author}}, function (err) {
-			if (err) return callback(err);
+		if (keyword.users.length === 1) {
+			Keyword.deleteOne({id: keyword.id}, function (err) {
+				if (err) return callback(err);
 
-			callback(null);
-		})
+				callback(null);
+			})
+		} else {
+			Keyword.findOneAndUpdate({id: keyword.id}, {$pull: {users: author}}, function (err) {
+				if (err) return callback(err);
+
+				callback(null);
+			})
+		}
 	})
 }
 

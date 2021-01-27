@@ -7,7 +7,7 @@ const commands = require('./commands');
 
 const client = new Discord.Client();
 
-if (process.env.NODE_ENV === "production") Sentry.init({dsn: config.SENTRY_DSN});
+if (process.env.NODE_ENV === "production") Sentry.init({dsn: process.env.SENTRY_DSN});
 
 client.on('ready', () => {
 	console.log("Discord bot ready");
