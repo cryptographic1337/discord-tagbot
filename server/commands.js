@@ -113,6 +113,20 @@ exports.list = function (msg) {
 	})
 }
 
+exports.help = function (msg) {
+	let message = "";
+	message += "```";
+	message += "!kw add {keyword 1} [keyword 2] [keyword 3]... - Add keyword(s)\n";
+	message += "!kw remove {keyword} - Remove a keyword from your subscription list\n";
+	message += "!kw list - View all of your subscribed keywords\n";
+	message += "!kw ping - View bot's latency\n";
+	message += "!kw help - View this message again"
+	message += "```";
+
+	msg.react("✅");
+	msg.author.send(message);
+}
+
 exports.ping = function (msg) {
 	const timeTaken = Date.now() - msg.createdTimestamp;
 	msg.reply(`Pong! This message had a latency of ${timeTaken}ms.`);
