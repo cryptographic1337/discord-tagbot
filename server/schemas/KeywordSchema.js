@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 const schema = new Schema({
 	id: {type: String, unique: true},
 	keyword: {type: String, unique: true},
-	users: Array
+	users: Array,
+	server_id: Number
 })
 
 module.exports = mongoose.model('Keywords', schema);

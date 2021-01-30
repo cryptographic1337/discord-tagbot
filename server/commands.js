@@ -11,13 +11,15 @@ function handle_error(err, msg, report=true) {
 exports.add = function (msg, args) {
 	if (args.length === 0) return msg.reply('you must include the keyword you want me to monitor.');
 
+	const server = msg.guild.id;
+
 	let count = 0;
 	let added_keywords = [];
 	let subscribed_keywords = [];
 	let failed_keywords = [];
 
 	args.forEach(keyword => {
-		database.addKeyword(msg.author.id, keyword, function (err) {
+		database.addKeyword(msg.author.id, keyword, server, function (err) {
 			if (err) {
 				if (err === "ERR_USER_ALREADY_SUBSCRIBED") {
 					subscribed_keywords.push(keyword);
@@ -42,7 +44,7 @@ exports.add = function (msg, args) {
 				message += "the following keywords have been added:\n";
 
 				added_keywords.forEach(result => {
-					message += result + "\n";
+					message += "`" + result + "`\n";
 				})
 			} else {
 				message += "no keywords were added.\n";
@@ -55,7 +57,7 @@ exports.add = function (msg, args) {
 				message += "You are already subscribed to the following keywords:\n";
 
 				subscribed_keywords.forEach(result => {
-					message += result + "\n";
+					message += "`" + result + "`\n";
 				})
 
 				message += "\n";
@@ -65,7 +67,7 @@ exports.add = function (msg, args) {
 				message += "The following keywords failed to add:\n";
 
 				failed_keywords.forEach(result => {
-					message += result + "\n";
+					message += "`" + result + "`\n";
 				})
 			}
 
@@ -77,7 +79,8 @@ exports.add = function (msg, args) {
 exports.remove = function (msg, args) {
 	if (args.length === 0) return msg.reply('you must include the keyword you want me to remove.');
 
-	database.removeKeyword(msg.author.id, args[0], function (err) {
+	const server = msg.guild.id;
+	database.removeKeyword(msg.author.id, args[0], server, function (err) {
 		if (err) {
 			if (err === "ERR_USER_NOT_SUBSCRIBED") return msg.reply('you are not subscribed to this keyword.');
 
@@ -89,7 +92,8 @@ exports.remove = function (msg, args) {
 }
 
 exports.list = function (msg) {
-	database.getUserKeywords(msg.author.id, function (err, keywords) {
+	const server = msg.guild.id;
+	database.getUserKeywords(msg.author.id, server, function (err, keywords) {
 		if (err) return handle_error(err, msg);
 
 		let message = "";
@@ -114,7 +118,7 @@ exports.ping = function (msg) {
 	msg.reply(`Pong! This message had a latency of ${timeTaken}ms.`);
 }
 
-exports.handleMessage = function (msg, pingChannel) {
+exports.handleMessage = function (msg, get_user) {
 	if (msg.embeds.length === 0) return;
 
 	let titles = [];
@@ -123,7 +127,8 @@ exports.handleMessage = function (msg, pingChannel) {
 		if (result.description) titles.push(result.description?.toLowerCase());
 	})
 
-	database.getAllKeywords(function (err, keywords) {
+	const server = msg.guild.id;
+	database.getAllKeywords(server, function (err, keywords) {
 		if (err) return handle_error(err, msg);
 
 		keywords.forEach(keyword => {
@@ -139,11 +144,11 @@ exports.handleMessage = function (msg, pingChannel) {
 		message += `Keyword \`${keyword}\` has been found. Use the link below to jump to the message.\n`;
 		message += "\n";
 		message += msg.url;
-		message += "\n";
-		users.forEach(user => {
-			message += '<@' + user + '>\n';
-		})
 
-		pingChannel.send(message);
+		users.forEach(user => {
+			get_user(user).then(user => {
+				user.send(message);
+			})
+		})
 	}
 }

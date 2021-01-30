@@ -21,9 +21,10 @@ client.on('ready', () => {
 	})
 })
 
+
 client.on("message", function (msg) {
 	if (!msg.content.startsWith(process.env.PREFIX)) {
-		commands.handleMessage(msg, client.channels.cache.get(process.env.CHANNEL_ID));
+		commands.handleMessage(msg, (user) => client.users.fetch(user));
 	} else {
 		const commandBody = msg.content.slice(process.env.PREFIX.length).replace(' ', '');
 		const args = commandBody.split(' ');

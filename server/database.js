@@ -16,15 +16,16 @@ mongoose.connection.on('error', function (err) {
 	console.error(err)
 })
 
-exports.addKeyword = function (author, user_keyword, callback) {
-	Keyword.findOne({keyword: user_keyword}, function (err, keyword) {
+exports.addKeyword = function (author, user_keyword, server_id, callback) {
+	Keyword.findOne({keyword: user_keyword, server_id: server_id}, function (err, keyword) {
 		if (err) return callback(err);
 
 		if (!keyword) {
 			Keyword.create({
 				id: uuid(),
 				keyword: user_keyword,
-				users: [author]
+				users: [author],
+				server_id: server_id
 			}, function (err) {
 				if (err) return callback(err);
 
@@ -42,8 +43,8 @@ exports.addKeyword = function (author, user_keyword, callback) {
 	})
 }
 
-exports.removeKeyword = function (author, keyword, callback) {
-	Keyword.findOne({keyword: keyword}, function (err, keyword) {
+exports.removeKeyword = function (author, keyword, server_id, callback) {
+	Keyword.findOne({keyword: keyword, server_id: server_id}, function (err, keyword) {
 		if (err) return callback(err);
 		if (!keyword.users.includes(author)) return callback("ERR_USER_NOT_SUBSCRIBED");
 
@@ -63,16 +64,8 @@ exports.removeKeyword = function (author, keyword, callback) {
 	})
 }
 
-exports.getAllKeywords = function (callback) {
-	Keyword.find({}, function (err, keywords) {
-		if (err) return callback(err);
-
-		callback(null, keywords);
-	})
-}
-
-exports.getUserKeywords = function (id, callback) {
-	Keyword.find({}, function (err, keywords) {
+exports.getUserKeywords = function (id, server_id, callback) {
+	Keyword.find({server_id: server_id}, function (err, keywords) {
 		if (err) return callback(err);
 		let user_keywords = [];
 
@@ -81,5 +74,13 @@ exports.getUserKeywords = function (id, callback) {
 		})
 
 		callback(null, user_keywords);
+	})
+}
+
+exports.getAllKeywords = function (server_id, callback) {
+	Keyword.find({server_id: server_id}, function (err, keywords) {
+		if (err) return callback(err);
+
+		callback(null, keywords);
 	})
 }
