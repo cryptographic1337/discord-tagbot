@@ -2,10 +2,10 @@ const Sentry = require("@sentry/node");
 
 const database = require('./database');
 
-function handle_error(err, msg, report=true) {
+function handle_error(err, msg) {
 	Sentry.captureException(err);
 	console.error(err);
-	if (report) msg.reply('there was an unknown error. Sorry about that!')
+	if (msg) msg.reply('there was an unknown error. Sorry about that!')
 }
 
 exports.add = function (msg, args) {
@@ -24,6 +24,8 @@ exports.add = function (msg, args) {
 				if (err === "ERR_USER_ALREADY_SUBSCRIBED") {
 					subscribed_keywords.push(keyword);
 				} else {
+					handle_error(err);
+					
 					failed_keywords.push(keyword);
 				}
 			} else {
