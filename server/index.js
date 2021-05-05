@@ -34,6 +34,8 @@ client.on("message", function (msg) {
 		if (command === "list") return commands.list(msg);
 		if (command === "help") return commands.help(msg);
 		if (command === "ping") return commands.ping(msg);
+
+		if (command === "cadd") return commands.addChannel(msg, args);
 	}
 })
 

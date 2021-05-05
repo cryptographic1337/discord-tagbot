@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const {v4: uuid} = require('uuid');
 
 const Keyword = require('./schemas/KeywordSchema');
+const Setting = require('./schemas/WhitelistSchema');
 
 // Connect to database
 mongoose.connect(process.env.DB_URL, {
@@ -82,5 +83,37 @@ exports.getAllKeywords = function (server_id, callback) {
 		if (err) return callback(err);
 
 		callback(null, keywords);
+	})
+}
+
+exports.addChannel = function(server_id, value, callback) {
+	Whitelist.findOne({server: server_id}, function (err, setting) {
+		if (err) return callback(err);
+
+		if (!setting) {
+			Whitelist.create({
+				setting: 'whitelist',
+				server: server_id,
+				value: [value]
+			}, function (err) {
+				if (err) return callback(err);
+
+				callback(null);
+			})
+		} else {
+			Whitelist.findOneAndUpdate({server: server_id}, {$push: {value: value}}, function (err) {
+				if (err) return callback(err);
+
+				callback(null);
+			})
+		}
+	})
+}
+
+exports.getWhitelist = function (server_id, callback) {
+	Whitelist.findOne({server: server_id}, function (err, whitelist) {
+		if (err) return callback(err);
+
+		callback(null, whitelist.value);
 	})
 }

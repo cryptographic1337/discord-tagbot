@@ -25,7 +25,7 @@ exports.add = function (msg, args) {
 					subscribed_keywords.push(keyword);
 				} else {
 					handle_error(err);
-					
+
 					failed_keywords.push(keyword);
 				}
 			} else {
@@ -137,34 +137,55 @@ exports.ping = function (msg) {
 exports.handleMessage = function (msg, get_user) {
 	if (msg.embeds.length === 0) return;
 
-	let titles = [];
-	msg.embeds.forEach(result => {
-		if (result.title) titles.push(result.title?.toLowerCase());
-		if (result.description) titles.push(result.description?.toLowerCase());
-	})
-
 	const server = msg.guild.id;
-	database.getAllKeywords(server, function (err, keywords) {
+
+	database.getWhitelist(server, function (err, whitelist) {
 		if (err) return handle_error(err, msg);
 
-		keywords.forEach(keyword => {
-			for (let i = 0; i < titles.length; i++) {
-				if (titles[i].includes(keyword.keyword?.toLowerCase()))
-					notify_users(keyword.keyword, keyword.users)
-			}
+		if (!whitelist) return;
+		if (!whitelist.includes(msg.channel.id)) return;
+
+		let titles = [];
+		msg.embeds.forEach(result => {
+			if (result.title) titles.push(result.title?.toLowerCase());
+			if (result.description) titles.push(result.description?.toLowerCase());
 		})
-	})
 
-	function notify_users(keyword, users) {
-		let message = "";
-		message += `Keyword \`${keyword}\` has been found. Use the link below to jump to the message.\n`;
-		message += "\n";
-		message += msg.url;
+		database.getAllKeywords(server, function (err, keywords) {
+			if (err) return handle_error(err, msg);
 
-		users.forEach(user => {
-			get_user(user).then(user => {
-				user.send(message);
+			keywords.forEach(keyword => {
+				for (let i = 0; i < titles.length; i++) {
+					if (titles[i].includes(keyword.keyword?.toLowerCase()))
+						notify_users(keyword.keyword, keyword.users)
+				}
 			})
 		})
-	}
+
+		function notify_users(keyword, users) {
+			let message = "";
+			message += `Keyword \`${keyword}\` has been found. Use the link below to jump to the message.\n`;
+			message += "\n";
+			message += msg.url;
+
+			users.forEach(user => {
+				get_user(user).then(user => {
+					user.send(message);
+				})
+			})
+		}
+	})
+}
+
+exports.addChannel = function (msg, args) {
+	if (args.length !== 1) return msg.reply('please include the channel id to whitelist');
+
+	const server = msg.guild.id;
+	const channel_id = args[0];
+
+	database.addChannel(server, channel_id, function (err) {
+		if (err) return handle_error(err, msg);
+
+		msg.reply('channel added');
+	})
 }
