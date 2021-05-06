@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const {v4: uuid} = require('uuid');
 
 const Keyword = require('./schemas/KeywordSchema');
-const Setting = require('./schemas/WhitelistSchema');
+const Whitelist = require('./schemas/WhitelistSchema');
 
 // Connect to database
 mongoose.connect(process.env.DB_URL, {
