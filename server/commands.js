@@ -170,7 +170,13 @@ exports.handleMessage = function (msg, get_user) {
 
 			users.forEach(user => {
 				get_user(user).then(user => {
-					user.send(message);
+					user.send(message).catch(err => {
+						if (err) {
+							if (err.code !== 50007) { // Cannot send messages to this user
+								console.error(err);
+							}
+						}
+					});
 				})
 			})
 		}
