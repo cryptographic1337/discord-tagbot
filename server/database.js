@@ -114,6 +114,18 @@ exports.getWhitelist = function (server_id, callback) {
 	Whitelist.findOne({server: server_id}, function (err, whitelist) {
 		if (err) return callback(err);
 
-		callback(null, whitelist.value);
+		if (!whitelist.value) {
+			Whitelist.create({
+				setting: 'whitelist',
+				server: server_id,
+				value: []
+			}, function (err) {
+				if (err) return callback(err);
+
+				callback(null, []);
+			})
+		} else {
+			callback(null, whitelist.value);
+		}
 	})
 }
